@@ -1,7 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "s3-drive-storage-manage",
-  "pages_build_output_dir": "./dist",
-  "compatibility_date": "2025-01-01",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_date": "2026-08-15",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/i/*"]
+  }
 }
