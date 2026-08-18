@@ -16,7 +16,7 @@ import {
   Cpu,
   Sparkles,
 } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -30,8 +30,8 @@ export default function Dashboard() {
   const { signOut } = useAuth()
   const navigate = useNavigate()
 
-  const handleSignOut = () => {
-    signOut()
+  const handleSignOut = async () => {
+    await signOut()
     navigate("/sign-in", { replace: true })
   }
 

@@ -1,10 +1,10 @@
-import { AuthProvider } from "@/contexts/AuthContext"
+import { QueryProvider } from "@/providers/QueryProvider"
 import { AppRouter } from "@/router"
 
 export default function App() {
   return (
-    <AuthProvider>
+    <QueryProvider>
       <AppRouter />
-    </AuthProvider>
+    </QueryProvider>
   )
 }

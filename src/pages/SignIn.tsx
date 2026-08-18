@@ -1,7 +1,8 @@
 import React, { useState } from "react"
 import { useNavigate, Navigate } from "react-router"
 import { Eye, EyeOff, Lock, Database, ArrowRight, Loader2, AlertCircle, Sparkles, Shield, Cloud } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/features/auth/hooks/useAuth"
+import { ApiError } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,13 +15,31 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
+function getErrorMessage(error: Error | null): string | null {
+  if (!error) return null
+  if (error instanceof ApiError) {
+    if (error.status === 429) {
+      return "Too many failed attempts. Account is temporarily locked out. Please try again later."
+    }
+    if (error.status === 503) {
+      return "Authentication service is unavailable or DASHBOARD_PASSWORD is not configured on backend."
+    }
+    if (error.status === 401) {
+      return error.message || "Incorrect password. Please try again."
+    }
+    if (error.status === 0) {
+      return error.message || "Failed to connect to authentication service"
+    }
+    return error.message
+  }
+  return error.message || "An unexpected error occurred. Please try again."
+}
+
 export default function SignIn() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
 
-  const { signIn, isAuthenticated, isLoading } = useAuth()
+  const { signIn, isAuthenticated, isLoading, isSigningIn, signInError, resetSignInError } = useAuth()
   const navigate = useNavigate()
 
   // If already authenticated and not in loading state, redirect to dashboard
@@ -28,27 +47,19 @@ export default function SignIn() {
     return <Navigate to="/" replace />
   }
 
+  const error = getErrorMessage(signInError)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!password.trim()) {
-      setError("Please enter your password")
+    if (!password.trim() || isSigningIn) {
       return
     }
 
-    setError(null)
-    setSubmitting(true)
-
     try {
-      const result = await signIn(password)
-      if (result.success) {
-        navigate("/", { replace: true })
-      } else {
-        setError(result.error || "Authentication failed")
-      }
+      await signIn(password)
+      navigate("/", { replace: true })
     } catch {
-      setError("An unexpected error occurred. Please try again.")
-    } finally {
-      setSubmitting(false)
+      // Error handled by mutation state
     }
   }
 
@@ -129,11 +140,11 @@ export default function SignIn() {
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value)
-                      if (error) setError(null)
+                      if (signInError) resetSignInError()
                     }}
                     placeholder="Enter management password"
                     className="pl-10 pr-10 h-11 text-sm bg-background/80 border-border/80 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:border-blue-500 transition-all"
-                    disabled={submitting}
+                    disabled={isSigningIn}
                     autoComplete="current-password"
                     autoFocus
                   />
@@ -158,9 +169,9 @@ export default function SignIn() {
               <Button
                 type="submit"
                 className="w-full h-11 font-semibold rounded-xl text-sm"
-                disabled={submitting || !password.trim()}
+                disabled={isSigningIn || !password.trim()}
               >
-                {submitting ? (
+                {isSigningIn ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Verifying Credentials...
