@@ -1,4 +1,4 @@
-import { ShieldCheck, ArrowUpRight, CheckCircle2, XCircle } from "lucide-react"
+import { ShieldCheck, ArrowUpRight, CheckCircle2, XCircle, FolderTree } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -31,6 +31,8 @@ export function GatewayConfigCard({ gateway, isLoading }: GatewayConfigCardProps
   const hasS3Keys = creds?.s3Keys ?? false
   const hasOAuth = creds?.googleOAuth ?? false
   const hasPassword = creds?.dashboardPassword ?? false
+  const rootFolder = gateway?.rootFolder
+  const isRootConfigured = rootFolder?.configured ?? false
 
   return (
     <Card className="border-border/80 bg-card/85 backdrop-blur-sm shadow-md flex flex-col justify-between">
@@ -40,13 +42,38 @@ export function GatewayConfigCard({ gateway, isLoading }: GatewayConfigCardProps
             <div className="p-1.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
-            <CardTitle className="text-base font-bold">Security &amp; Protocol</CardTitle>
+            <CardTitle className="text-base font-bold">Security &amp; Storage Root</CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Authentication and credential verification
+            Authentication, credentials, and storage root folder
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {/* Storage Root Folder */}
+          <div className="p-3 rounded-xl bg-secondary/40 border border-border/60 space-y-1">
+            <div className="text-xs font-semibold text-foreground flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <FolderTree className="h-3.5 w-3.5 text-indigo-400" />
+                <span>Drive Root Folder</span>
+              </span>
+              <Badge variant={isRootConfigured ? "success" : "danger"} className="text-[10px] px-1.5 py-0">
+                {isRootConfigured ? (rootFolder?.name ?? "Configured") : "Not Configured"}
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+              {isRootConfigured ? (
+                <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
+              ) : (
+                <XCircle className="h-3 w-3 text-red-500 shrink-0" />
+              )}
+              <span>
+                {isRootConfigured
+                  ? `All buckets anchored under '/${rootFolder?.name}'`
+                  : "DRIVE_ROOT_FOLDER missing in Worker configuration"}
+              </span>
+            </p>
+          </div>
+
           {/* AWS SigV4 */}
           <div className="p-3 rounded-xl bg-secondary/40 border border-border/60 space-y-1">
             <div className="text-xs font-semibold text-foreground flex items-center justify-between">

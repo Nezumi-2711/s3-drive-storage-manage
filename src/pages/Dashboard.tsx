@@ -17,7 +17,6 @@ import { GatewayStatusCard } from "@/features/status/components/GatewayStatusCar
 import { DriveQuotaCard } from "@/features/status/components/DriveQuotaCard"
 import { MultipartStatusCard } from "@/features/status/components/MultipartStatusCard"
 import { BucketStatsTable } from "@/features/status/components/BucketStatsTable"
-import { GatewayConfigCard } from "@/features/status/components/GatewayConfigCard"
 import { Button } from "@/components/ui/button"
 import { formatRelativeTime } from "@/lib/format"
 
@@ -191,15 +190,11 @@ export default function Dashboard() {
         </div>
 
         {/* Feature Capabilities & Specifications */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="w-full">
           <BucketStatsTable
             stats={bucketStatsData}
             isLoading={isBucketsLoading}
             error={bucketsError}
-          />
-          <GatewayConfigCard
-            gateway={statusData?.gateway}
-            isLoading={isStatusLoading}
           />
         </div>
       </main>

@@ -1,4 +1,4 @@
-import { QueryClient, QueryCache } from "@tanstack/react-query"
+import { QueryClient, QueryCache, MutationCache } from "@tanstack/react-query"
 import { ApiError } from "./api-client"
 import { clearAuthToken } from "./auth-storage"
 
@@ -8,17 +8,24 @@ import { clearAuthToken } from "./auth-storage"
 export function createQueryClient(): QueryClient {
   let client: QueryClient
 
+  const handle401 = (error: unknown) => {
+    if (error instanceof ApiError && error.status === 401) {
+      clearAuthToken()
+      client?.clear()
+    }
+  }
+
   const queryCache = new QueryCache({
-    onError: (error) => {
-      if (error instanceof ApiError && error.status === 401) {
-        clearAuthToken()
-        client?.clear()
-      }
-    },
+    onError: handle401,
+  })
+
+  const mutationCache = new MutationCache({
+    onError: handle401,
   })
 
   client = new QueryClient({
     queryCache,
+    mutationCache,
     defaultOptions: {
       queries: {
         staleTime: 60_000,

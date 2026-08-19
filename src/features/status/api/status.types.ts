@@ -6,6 +6,11 @@ export interface GatewayConfig {
   docsEnabled: boolean
   buckets: string[]
   publicReadBuckets: string[]
+  rootFolder: {
+    name: string | null
+    id: string | null
+    configured: boolean
+  }
   corsOrigins: string[]
   credentials: {
     s3Keys: boolean
