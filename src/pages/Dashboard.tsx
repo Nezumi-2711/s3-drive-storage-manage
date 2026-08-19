@@ -1,39 +1,65 @@
+import { useState } from "react"
 import { useNavigate } from "react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   Database,
   LogOut,
   ShieldCheck,
-  HardDrive,
-  Layers,
-  Server,
-  Activity,
-  FolderTree,
-  UploadCloud,
-  CheckCircle2,
-  Lock,
-  ArrowUpRight,
+  RotateCw,
   Radio,
-  Cpu,
-  Sparkles,
+  Lock,
 } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
+import { useStatus } from "@/features/status/hooks/useStatus"
+import { useBucketStats } from "@/features/status/hooks/useBucketStats"
+import { statusKeys } from "@/features/status/api/status.keys"
+import { GatewayStatusCard } from "@/features/status/components/GatewayStatusCard"
+import { DriveQuotaCard } from "@/features/status/components/DriveQuotaCard"
+import { MultipartStatusCard } from "@/features/status/components/MultipartStatusCard"
+import { BucketStatsTable } from "@/features/status/components/BucketStatsTable"
+import { GatewayConfigCard } from "@/features/status/components/GatewayConfigCard"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { formatRelativeTime } from "@/lib/format"
 
 export default function Dashboard() {
   const { signOut } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const {
+    data: statusData,
+    isLoading: isStatusLoading,
+    error: statusError,
+  } = useStatus()
+
+  const {
+    data: bucketStatsData,
+    isLoading: isBucketsLoading,
+    error: bucketsError,
+  } = useBucketStats()
 
   const handleSignOut = async () => {
     await signOut()
     navigate("/sign-in", { replace: true })
   }
+
+  const handleRefreshAll = async () => {
+    try {
+      setIsRefreshing(true)
+      await queryClient.invalidateQueries({ queryKey: statusKeys.all })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  const checkedAtTime = statusData?.checkedAt
+    ? new Date(statusData.checkedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+    : null
 
   return (
     <div className="relative min-h-screen bg-background bg-grid-pattern flex flex-col overflow-x-hidden">
@@ -99,7 +125,7 @@ export default function Dashboard() {
         {/* Welcome Banner */}
         <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-card via-card to-blue-500/5 p-6 sm:p-7 shadow-lg shadow-blue-950/5">
           <div className="absolute top-0 right-0 h-40 w-40 bg-gradient-to-bl from-cyan-500/10 via-blue-500/5 to-transparent rounded-bl-full pointer-events-none" />
-          
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
@@ -110,11 +136,11 @@ export default function Dashboard() {
                 Gateway Overview &amp; Control
               </h2>
               <p className="text-sm text-muted-foreground max-w-2xl font-medium">
-                Connected to Google Drive API with AWS S3 signature verification and multipart upload support via Cloudflare Workers.
+                Live metrics from Cloudflare Workers connected to Google Drive API with AWS S3 signature verification.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-center">
+            <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2 shrink-0">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border/80 shadow-xs">
                 <Radio className="h-4 w-4 text-emerald-500 animate-pulse" />
                 <div className="text-left">
@@ -122,173 +148,59 @@ export default function Dashboard() {
                   <div className="text-xs font-bold text-foreground">Global CDN Active</div>
                 </div>
               </div>
+
+              <div className="flex items-center gap-2">
+                {checkedAtTime && (
+                  <span className="text-[11px] text-muted-foreground font-medium">
+                    Updated {formatRelativeTime(statusData?.checkedAt)} ({checkedAtTime})
+                  </span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshAll}
+                  disabled={isStatusLoading || isBucketsLoading || isRefreshing}
+                  className="h-7 text-xs px-2 rounded-lg gap-1"
+                  title="Refresh status and bucket overview"
+                >
+                  <RotateCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
+                  <span className="hidden min-[420px]:inline">Refresh</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Status / Quick Overview cards */}
         <div className="grid gap-4 sm:grid-cols-3">
-          {/* Card 1 */}
-          <Card className="relative overflow-hidden border-border/80 bg-card/90 backdrop-blur-sm shadow-md hover:shadow-lg hover:border-blue-500/30 transition-all group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Gateway Engine
-              </CardTitle>
-              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-                <Server className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold flex items-center gap-2 text-foreground">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50" />
-                Online &amp; Healthy
-              </div>
-              <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                <Activity className="h-3 w-3 text-emerald-500" />
-                <span>Cloudflare Worker edge routing</span>
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Card 2 */}
-          <Card className="relative overflow-hidden border-border/80 bg-card/90 backdrop-blur-sm shadow-md hover:shadow-lg hover:border-blue-500/30 transition-all group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                S3 Storage Backend
-              </CardTitle>
-              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-                <HardDrive className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">Google Drive</div>
-              <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-blue-500" />
-                <span>Root directory auto-mapped</span>
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Card 3 */}
-          <Card className="relative overflow-hidden border-border/80 bg-card/90 backdrop-blur-sm shadow-md hover:shadow-lg hover:border-cyan-500/30 transition-all group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500" />
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Multipart Uploads
-              </CardTitle>
-              <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-500 group-hover:scale-110 transition-transform">
-                <Layers className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">Durable Objects</div>
-              <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                <Cpu className="h-3 w-3 text-cyan-500" />
-                <span>Resumable state coordination</span>
-              </p>
-            </CardContent>
-          </Card>
+          <GatewayStatusCard
+            status={statusData}
+            isLoading={isStatusLoading}
+            error={statusError}
+          />
+          <DriveQuotaCard
+            drive={statusData?.drive}
+            isLoading={isStatusLoading}
+            error={statusError}
+          />
+          <MultipartStatusCard
+            gateway={statusData?.gateway}
+            isLoading={isStatusLoading}
+            error={statusError}
+          />
         </div>
 
-        {/* Feature Capabilities & Explorer Card */}
+        {/* Feature Capabilities & Specifications */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Explorer placeholder */}
-          <Card className="lg:col-span-2 border-border/80 bg-card/85 backdrop-blur-sm shadow-md">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                    <FolderTree className="h-4 w-4" />
-                  </div>
-                  <CardTitle className="text-base font-bold">Bucket Explorer</CardTitle>
-                </div>
-                <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
-                  Upcoming Module
-                </span>
-              </div>
-              <CardDescription className="text-xs text-muted-foreground">
-                Full-featured visual browser for files, folders, and storage metadata.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <div className="h-48 rounded-xl border border-dashed border-border flex flex-col items-center justify-center p-6 text-center bg-muted/20">
-                <div className="p-3 rounded-2xl bg-gradient-to-tr from-blue-500/10 to-cyan-500/10 border border-blue-500/20 text-blue-500 mb-3">
-                  <UploadCloud className="h-6 w-6 stroke-[1.8]" />
-                </div>
-                <h4 className="text-sm font-semibold text-foreground">Storage Bridge Ready</h4>
-                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-                  Sign-in verification complete. Ready for bucket exploration, object uploads, downloads, and presigned URL operations.
-                </p>
-              </div>
-
-              {/* Supported S3 Actions badges */}
-              <div className="flex flex-wrap items-center gap-2 pt-2">
-                <span className="text-[11px] font-medium text-muted-foreground mr-1">Supported APIs:</span>
-                {["s3:ListObjectsV2", "s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:CreateMultipartUpload"].map((api) => (
-                  <span
-                    key={api}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium bg-secondary/80 text-secondary-foreground border border-border/60"
-                  >
-                    <Sparkles className="h-2.5 w-2.5 text-blue-500" />
-                    {api}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Specifications Info card */}
-          <Card className="border-border/80 bg-card/85 backdrop-blur-sm shadow-md flex flex-col justify-between">
-            <div>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                    <ShieldCheck className="h-4 w-4" />
-                  </div>
-                  <CardTitle className="text-base font-bold">Security &amp; Protocol</CardTitle>
-                </div>
-                <CardDescription className="text-xs">
-                  Compliance and encryption standards
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="p-3 rounded-xl bg-secondary/40 border border-border/60 space-y-1">
-                  <div className="text-xs font-semibold text-foreground flex items-center justify-between">
-                    <span>AWS Signature Version 4</span>
-                    <span className="text-[10px] text-emerald-600 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">Enabled</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Cryptographic HMAC-SHA256 request authentication
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-secondary/40 border border-border/60 space-y-1">
-                  <div className="text-xs font-semibold text-foreground flex items-center justify-between">
-                    <span>Google OAuth 2.0</span>
-                    <span className="text-[10px] text-blue-600 font-bold bg-blue-500/10 px-1.5 py-0.5 rounded">Auto-Refresh</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Bearer token rotation via Cloudflare KV store
-                  </p>
-                </div>
-              </CardContent>
-            </div>
-
-            <div className="p-4 border-t border-border/60 bg-muted/10">
-              <a
-                href="https://developers.google.com/drive"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-between w-full text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                <span>Google Drive API Reference</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </Card>
+          <BucketStatsTable
+            stats={bucketStatsData}
+            isLoading={isBucketsLoading}
+            error={bucketsError}
+          />
+          <GatewayConfigCard
+            gateway={statusData?.gateway}
+            isLoading={isStatusLoading}
+          />
         </div>
       </main>
     </div>
