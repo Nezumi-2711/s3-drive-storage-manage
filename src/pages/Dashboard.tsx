@@ -13,11 +13,10 @@ import { useAuth } from "@/features/auth/hooks/useAuth"
 import { useStatus } from "@/features/status/hooks/useStatus"
 import { useBucketStats } from "@/features/status/hooks/useBucketStats"
 import { statusKeys } from "@/features/status/api/status.keys"
-import { GatewayStatusCard } from "@/features/status/components/GatewayStatusCard"
-import { DriveQuotaCard } from "@/features/status/components/DriveQuotaCard"
-import { MultipartStatusCard } from "@/features/status/components/MultipartStatusCard"
+import { SystemOverviewCard } from "@/features/status/components/SystemOverviewCard"
 import { BucketStatsTable } from "@/features/status/components/BucketStatsTable"
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import { formatRelativeTime } from "@/lib/format"
 
 export default function Dashboard() {
@@ -62,13 +61,6 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen bg-background bg-grid-pattern flex flex-col overflow-x-hidden">
-      {/* Background ambient colorful glow effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[15%] -left-[10%] h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-[130px]" />
-        <div className="absolute top-[20%] -right-[15%] h-[550px] w-[550px] rounded-full bg-cyan-400/10 blur-[140px]" />
-        <div className="absolute -bottom-[20%] left-[30%] h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[130px]" />
-      </div>
-
       {/* Navigation Header */}
       <header className="border-b border-border/70 bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-xs">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 min-h-16 py-2.5 sm:py-0 flex items-center justify-between gap-3">
@@ -106,6 +98,7 @@ export default function Dashboard() {
               <Lock className="h-3.5 w-3.5 text-emerald-500" />
               <span className="font-medium text-foreground/80">Admin Mode</span>
             </div>
+            <ThemeToggle showLabel={false} />
             <Button
               variant="outline"
               size="sm"
@@ -170,24 +163,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Status / Quick Overview cards */}
-        <div className="grid gap-4 sm:grid-cols-3">
-          <GatewayStatusCard
-            status={statusData}
-            isLoading={isStatusLoading}
-            error={statusError}
-          />
-          <DriveQuotaCard
-            drive={statusData?.drive}
-            isLoading={isStatusLoading}
-            error={statusError}
-          />
-          <MultipartStatusCard
-            gateway={statusData?.gateway}
-            isLoading={isStatusLoading}
-            error={statusError}
-          />
-        </div>
+        {/* Unified Status / Quick Overview */}
+        <SystemOverviewCard
+          status={statusData}
+          isLoading={isStatusLoading}
+          error={statusError}
+        />
 
         {/* Feature Capabilities & Specifications */}
         <div className="w-full">
