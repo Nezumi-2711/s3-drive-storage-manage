@@ -39,11 +39,22 @@ export default function SignIn() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  const { signIn, isAuthenticated, isLoading, isSigningIn, signInError, resetSignInError } = useAuth()
+  const { signIn, isAuthenticated, isLoading, isSigningIn, signInError, resetSignInError, token } = useAuth()
   const navigate = useNavigate()
 
-  // If already authenticated and not in loading state, redirect to dashboard
-  if (!isLoading && isAuthenticated) {
+  // Guard against flashing sign-in UI while checking session or if already authenticated
+  if (isLoading || (token && !isAuthenticated)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background bg-grid-pattern">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground font-medium">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
