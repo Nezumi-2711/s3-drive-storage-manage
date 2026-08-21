@@ -16,6 +16,7 @@ import {
   HardDrive,
   CheckCircle2,
   RefreshCw,
+  Cable,
 } from "lucide-react"
 import { Link } from "react-router"
 import { useQueryClient } from "@tanstack/react-query"
@@ -531,6 +532,16 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                                       <FolderOpen className="h-3.5 w-3.5" />
                                     </Button>
                                   </Link>
+                                  <Link to={`/integration?bucket=${encodeURIComponent(b.name)}`}>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                      title="Connect a tool to this bucket"
+                                    >
+                                      <Cable className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </Link>
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -584,6 +595,16 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                                   title="Browse objects"
                                 >
                                   <FolderOpen className="h-3.5 w-3.5" />
+                                </Button>
+                              </Link>
+                              <Link to={`/integration?bucket=${encodeURIComponent(b.name)}`}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 rounded-lg"
+                                  title="Connect a tool to this bucket"
+                                >
+                                  <Cable className="h-3.5 w-3.5" />
                                 </Button>
                               </Link>
                               <Button

@@ -1,4 +1,4 @@
-import { ArrowLeft, Database, HardDrive, Shield } from "lucide-react"
+import { ArrowLeft, Cable, Database, HardDrive, Shield } from "lucide-react"
 import { Link, useParams, useSearchParams } from "react-router"
 import { Badge } from "../components/ui/badge"
 import { Button } from "../components/ui/button"
@@ -59,6 +59,14 @@ export function BucketBrowser() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Link
+              to="/integration"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-secondary/70 border border-border/60 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+              title="Connection details and S3 access keys"
+            >
+              <Cable className="h-3.5 w-3.5 text-blue-500" />
+              Integration
+            </Link>
             <ThemeToggle />
             <Button
               type="button"

@@ -8,6 +8,7 @@ import {
   RotateCw,
   Radio,
   Lock,
+  Cable,
 } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { useStatus } from "@/features/status/hooks/useStatus"
@@ -98,6 +99,15 @@ export default function Dashboard() {
               <Lock className="h-3.5 w-3.5 text-emerald-500" />
               <span className="font-medium text-foreground/80">Admin Mode</span>
             </div>
+            <button
+              type="button"
+              onClick={() => navigate("/integration")}
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-secondary/70 border border-border/60 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-border transition-colors cursor-pointer"
+              title="Connection details and S3 access keys"
+            >
+              <Cable className="h-3.5 w-3.5 text-blue-500" />
+              <span className="hidden min-[480px]:inline">Integration</span>
+            </button>
             <ThemeToggle showLabel={false} />
             <Button
               variant="outline"

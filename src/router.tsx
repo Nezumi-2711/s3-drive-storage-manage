@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router"
 import SignIn from "@/pages/SignIn"
 import Dashboard from "@/pages/Dashboard"
 import BucketBrowser from "@/pages/BucketBrowser"
+import Integration from "@/pages/Integration"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { PublicOnlyRoute } from "@/components/PublicOnlyRoute"
 
@@ -30,6 +31,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <BucketBrowser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/integration"
+          element={
+            <ProtectedRoute>
+              <Integration />
             </ProtectedRoute>
           }
         />
