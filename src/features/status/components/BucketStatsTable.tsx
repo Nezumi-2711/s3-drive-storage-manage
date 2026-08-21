@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react"
 import {
   FolderTree,
+  FolderOpen,
   RotateCw,
   Sparkles,
   AlertCircle,
@@ -16,6 +17,7 @@ import {
   CheckCircle2,
   RefreshCw,
 } from "lucide-react"
+import { Link } from "react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -442,7 +444,12 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                                     <FolderTree className="h-4 w-4" />
                                   </div>
                                   <div className="flex flex-col">
-                                    <span className="font-mono font-semibold text-foreground text-xs">{b.name}</span>
+                                    <Link
+                                      to={`/buckets/${encodeURIComponent(b.name)}`}
+                                      className="font-mono font-semibold text-foreground text-xs hover:text-primary hover:underline"
+                                    >
+                                      {b.name}
+                                    </Link>
                                     <span className="text-[10px] text-muted-foreground font-mono">
                                       s3://{b.name}
                                     </span>
@@ -513,15 +520,27 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
 
                               {/* Actions */}
                               <td className="py-3 px-4 text-center">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setDeletingBucket(b.name)}
-                                  className="h-7 w-7 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
-                                  title="Delete bucket"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
+                                <div className="flex items-center justify-center gap-1">
+                                  <Link to={`/buckets/${encodeURIComponent(b.name)}`}>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                      title="Browse objects"
+                                    >
+                                      <FolderOpen className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </Link>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setDeletingBucket(b.name)}
+                                    className="h-7 w-7 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                                    title="Delete bucket"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           )
@@ -546,20 +565,37 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                                 <FolderTree className="h-4 w-4" />
                               </div>
                               <div className="min-w-0">
-                                <div className="font-mono font-bold text-sm text-foreground truncate">{b.name}</div>
+                                <Link
+                                  to={`/buckets/${encodeURIComponent(b.name)}`}
+                                  className="font-mono font-bold text-sm text-foreground truncate hover:text-primary hover:underline block"
+                                >
+                                  {b.name}
+                                </Link>
                                 <div className="text-[10px] font-mono text-muted-foreground">s3://{b.name}</div>
                               </div>
                             </div>
 
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setDeletingBucket(b.name)}
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg shrink-0"
-                              title="Delete bucket"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Link to={`/buckets/${encodeURIComponent(b.name)}`}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
+                                  title="Browse objects"
+                                >
+                                  <FolderOpen className="h-3.5 w-3.5" />
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeletingBucket(b.name)}
+                                className="h-7 w-7 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg shrink-0"
+                                title="Delete bucket"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
                           </div>
 
                           {/* Stats Grid inside card */}

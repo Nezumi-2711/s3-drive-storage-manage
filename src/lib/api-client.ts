@@ -19,12 +19,12 @@ export interface ApiRequestOptions extends Omit<RequestInit, "body"> {
 }
 
 /**
- * Type-safe fetch wrapper with error handling and automatic bearer authentication.
+ * Core fetch wrapper returning the raw Response with auth headers and error handling.
  */
-export async function apiRequest<T>(
+export async function apiFetch(
   path: string,
   options: ApiRequestOptions = {}
-): Promise<T> {
+): Promise<Response> {
   const { body, auth = true, headers: customHeaders, ...restOptions } = options
 
   const headers = new Headers(customHeaders)
@@ -75,6 +75,18 @@ export async function apiRequest<T>(
     }
     throw new ApiError(response.status, errorMessage)
   }
+
+  return response
+}
+
+/**
+ * Type-safe fetch wrapper with error handling, automatic bearer authentication and JSON parsing.
+ */
+export async function apiRequest<T>(
+  path: string,
+  options: ApiRequestOptions = {}
+): Promise<T> {
+  const response = await apiFetch(path, options)
 
   if (response.status === 204) {
     return undefined as T
