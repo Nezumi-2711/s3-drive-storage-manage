@@ -1,30 +1,20 @@
-import { useState } from "react"
 import { useNavigate } from "react-router"
-import { useQueryClient } from "@tanstack/react-query"
 import {
   Database,
   LogOut,
-  ShieldCheck,
-  RotateCw,
-  Radio,
-  Lock,
   Cable,
 } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { useStatus } from "@/features/status/hooks/useStatus"
 import { useBucketStats } from "@/features/status/hooks/useBucketStats"
-import { statusKeys } from "@/features/status/api/status.keys"
 import { SystemOverviewCard } from "@/features/status/components/SystemOverviewCard"
 import { BucketStatsTable } from "@/features/status/components/BucketStatsTable"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ThemeToggle"
-import { formatRelativeTime } from "@/lib/format"
 
 export default function Dashboard() {
   const { signOut } = useAuth()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const {
     data: statusData,
@@ -42,23 +32,6 @@ export default function Dashboard() {
     await signOut()
     navigate("/sign-in", { replace: true })
   }
-
-  const handleRefreshAll = async () => {
-    try {
-      setIsRefreshing(true)
-      await queryClient.invalidateQueries({ queryKey: statusKeys.all })
-    } finally {
-      setIsRefreshing(false)
-    }
-  }
-
-  const checkedAtTime = statusData?.checkedAt
-    ? new Date(statusData.checkedAt).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    : null
 
   return (
     <div className="relative min-h-screen bg-background bg-grid-pattern flex flex-col overflow-x-hidden">
@@ -95,10 +68,6 @@ export default function Dashboard() {
 
           {/* Actions & Badges */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/70 border border-border/60 text-xs text-muted-foreground">
-              <Lock className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="font-medium text-foreground/80">Admin Mode</span>
-            </div>
             <button
               type="button"
               onClick={() => navigate("/integration")}
@@ -124,55 +93,6 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Welcome Banner */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-card via-card to-blue-500/5 p-6 sm:p-7 shadow-lg shadow-blue-950/5">
-          <div className="absolute top-0 right-0 h-40 w-40 bg-gradient-to-bl from-cyan-500/10 via-blue-500/5 to-transparent rounded-bl-full pointer-events-none" />
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-                <ShieldCheck className="h-4 w-4" />
-                <span>Authenticated Session Active</span>
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Gateway Overview &amp; Control
-              </h2>
-              <p className="text-sm text-muted-foreground max-w-2xl font-medium">
-                Live metrics from Cloudflare Workers connected to Google Drive API with AWS S3 signature verification.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2 shrink-0">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border/80 shadow-xs">
-                <Radio className="h-4 w-4 text-emerald-500 animate-pulse" />
-                <div className="text-left">
-                  <div className="text-[10px] uppercase font-bold text-muted-foreground">Edge Network</div>
-                  <div className="text-xs font-bold text-foreground">Global CDN Active</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {checkedAtTime && (
-                  <span className="text-[11px] text-muted-foreground font-medium">
-                    Updated {formatRelativeTime(statusData?.checkedAt)} ({checkedAtTime})
-                  </span>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefreshAll}
-                  disabled={isStatusLoading || isBucketsLoading || isRefreshing}
-                  className="h-7 text-xs px-2 rounded-lg gap-1"
-                  title="Refresh status and bucket overview"
-                >
-                  <RotateCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
-                  <span className="hidden min-[420px]:inline">Refresh</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Unified Status / Quick Overview */}
         <SystemOverviewCard
           status={statusData}

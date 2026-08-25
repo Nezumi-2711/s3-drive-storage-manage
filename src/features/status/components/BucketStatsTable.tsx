@@ -3,7 +3,6 @@ import {
   FolderTree,
   FolderOpen,
   RotateCw,
-  Sparkles,
   AlertCircle,
   Plus,
   DownloadCloud,
@@ -14,7 +13,6 @@ import {
   Lock,
   ArrowUpDown,
   HardDrive,
-  CheckCircle2,
   RefreshCw,
   Cable,
 } from "lucide-react"
@@ -164,27 +162,28 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
             </div>
 
             {/* Main Action Buttons */}
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-1.5 sm:gap-2 w-full md:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsImportOpen(true)}
                 disabled={isLoading}
-                className="h-8 text-xs px-3 rounded-lg gap-1.5 font-medium shadow-xs"
+                className="flex-1 md:flex-none h-8 text-[11px] sm:text-xs px-2 sm:px-3 rounded-lg gap-1 sm:gap-1.5 font-medium shadow-xs whitespace-nowrap justify-center min-w-0"
                 title="Import existing Google Drive folders into your storage root"
               >
-                <DownloadCloud className="h-3.5 w-3.5 text-blue-500" />
-                <span>Import from Drive</span>
+                <DownloadCloud className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                <span className="hidden sm:inline">Import from Drive</span>
+                <span className="sm:hidden">Import</span>
               </Button>
 
               <Button
                 size="sm"
                 onClick={() => setIsCreateOpen(true)}
                 disabled={isLoading}
-                className="h-8 text-xs px-3.5 rounded-lg gap-1.5 font-medium shadow-sm shadow-blue-500/20"
+                className="flex-1 md:flex-none h-8 text-[11px] sm:text-xs px-2 sm:px-3.5 rounded-lg gap-1 sm:gap-1.5 font-medium shadow-sm shadow-blue-500/20 whitespace-nowrap justify-center min-w-0"
                 title="Create a new storage bucket"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-3.5 w-3.5 shrink-0" />
                 <span>New Bucket</span>
               </Button>
 
@@ -193,11 +192,12 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                 size="sm"
                 onClick={handleForceRefresh}
                 disabled={isLoading || isRefreshing}
-                className="h-8 text-xs px-2.5 rounded-lg gap-1.5 font-medium shadow-xs"
+                className="flex-1 md:flex-none h-8 text-[11px] sm:text-xs px-2 sm:px-2.5 rounded-lg gap-1 sm:gap-1.5 font-medium shadow-xs whitespace-nowrap justify-center min-w-0"
                 title="Recalculate bucket stats from live storage"
               >
-                <RotateCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-blue-500" : ""}`} />
+                <RotateCw className={`h-3.5 w-3.5 shrink-0 ${isRefreshing ? "animate-spin text-blue-500" : ""}`} />
                 <span className="hidden sm:inline">{isRefreshing ? "Scanning..." : "Recalculate"}</span>
+                <span className="sm:hidden">{isRefreshing ? "Scanning" : "Recalc"}</span>
               </Button>
             </div>
           </div>
@@ -320,11 +320,11 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="flex items-center gap-1.5 self-start sm:self-auto p-1 bg-muted/50 rounded-lg border border-border/60">
+                <div className="flex items-center justify-between sm:justify-start gap-1.5 w-full sm:w-auto p-1 bg-muted/50 rounded-lg border border-border/60">
                   <button
                     type="button"
                     onClick={() => setFilterTab("all")}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                    className={`flex-1 sm:flex-initial justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
                       filterTab === "all"
                         ? "bg-card text-foreground shadow-xs font-semibold"
                         : "text-muted-foreground hover:text-foreground"
@@ -335,7 +335,7 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                   <button
                     type="button"
                     onClick={() => setFilterTab("public")}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-initial justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
                       filterTab === "public"
                         ? "bg-card text-emerald-600 dark:text-emerald-400 shadow-xs font-semibold"
                         : "text-muted-foreground hover:text-foreground"
@@ -347,7 +347,7 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
                   <button
                     type="button"
                     onClick={() => setFilterTab("private")}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-initial justify-center px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 ${
                       filterTab === "private"
                         ? "bg-card text-foreground shadow-xs font-semibold"
                         : "text-muted-foreground hover:text-foreground"
@@ -661,33 +661,6 @@ export function BucketStatsTable({ stats, isLoading, error }: BucketStatsTablePr
               )}
             </div>
           )}
-
-          {/* S3 capabilities bottom bar */}
-          <div className="pt-3 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-muted-foreground mr-1">S3 API Support:</span>
-              {[
-                { name: "s3:ListObjectsV2", desc: "List bucket objects" },
-                { name: "s3:GetObject", desc: "Download objects" },
-                { name: "s3:PutObject", desc: "Upload files" },
-                { name: "s3:DeleteObject", desc: "Delete files" },
-                { name: "s3:CreateMultipartUpload", desc: "Multipart uploads" },
-              ].map((api) => (
-                <span
-                  key={api.name}
-                  title={api.desc}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-medium bg-secondary/80 text-secondary-foreground border border-border/60 hover:border-border transition-colors cursor-default"
-                >
-                  <Sparkles className="h-2.5 w-2.5 text-blue-500" />
-                  {api.name}
-                </span>
-              ))}
-            </div>
-            <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-              <span>Direct Google Drive mapping active</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
